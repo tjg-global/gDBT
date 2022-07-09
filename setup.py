@@ -3,11 +3,13 @@ import glob
 import setuptools
 
 setuptools.setup(
-    name='python-site-packages',
-    version='1.1',
-    description='Exterion packages',
+    name='gdbt',
+    version='1.3',
+    description='Global DBT packages',
     author='Tim Golden',
-    author_email='tim.golden@exterionmedia.co.uk',
-    #~ modules = [os.path.basename(f) for f in glob.glob("*.py")],
-    scripts = ["gdbt.py"]
+    author_email='tim.golden@global.com',
+    packages = ["gdbt"],
+    entry_points = {
+        "console_scripts" : ["gdbt=gdbt.gdbt:command_line"]
+    }
 )
