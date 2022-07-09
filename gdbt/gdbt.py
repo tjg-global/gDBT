@@ -4,8 +4,6 @@ import re
 import subprocess
 
 def main(command, args):
-    print(command, args)
-
     DIRNAMES_TO_IGNORE = {".venv", ".venv0", "dbt_modules"}
     for dirpath, dirnames, filenames in os.walk("."):
         if DIRNAMES_TO_IGNORE & set(os.path.normpath(dirpath.lower()).split(os.path.sep)):
@@ -34,12 +32,8 @@ def main(command, args):
     else:
         env_branch = ""
 
-    print("env_branch:", env_branch)
-
     env_name = env_branch if env_branch in ('production', 'staging', 'master') else "aat"
-    print("env_name", env_name)
     src_db_prefix = "aat_" if env_name in ("master", "aat") else "uat_" if env_name == "staging" else ""
-    print("src_db_prefix:", src_db_prefix)
     target = "aat" if env_name in ('aat', 'master') else env_branch
 
     environment = dict(os.environ)
@@ -67,11 +61,9 @@ def main(command, args):
         print("About to set up dev branch")
         subprocess.run([dbt_exe, "run-operation", "setup_dev_branch"], env=environment)
 
-    print("About to run", [dbt_exe] + [command] + list(args) + ['--target=%s' % target])
     subprocess.run([dbt_exe] + [command] + list(args) + ['--target=%s' % target], env=environment)
 
 def command_line():
-    print("sys.argv", sys.argv)
     main(sys.argv[1], sys.argv[2:])
 
 if __name__ == '__main__':
