@@ -60,7 +60,7 @@ def main(command, args):
     #
     # If we're on a dev branch, but not master, set up the necessary databases
     #
-    if env_name == "aat" and env_branch and command.lower() in ["run", "compile", "test", "docs"]:
+    if env_name == "aat" and env_branch: ## and command.lower() in ["run", "compile", "test", "docs"]:
         print("About to set up dev branch")
         subprocess.run([dbt_exe, "run-operation", "setup_dev_branch"], env=environment)
 
