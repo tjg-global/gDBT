@@ -79,7 +79,7 @@ def main(job_id=None):
         code = djson.get("code")
         invocation_id = djson.get("invocation_id")
         message = djson.get("msg")
-        print(invocation_id, ts, code, message)
+        print(job_id, ts, code, message)
 
         with db.cursor() as q:
             q.execute(
@@ -107,4 +107,4 @@ def command_line():
     main(*sys.argv[1:])
 
 if __name__ == '__main__':
-    commandline()
+    command_line()

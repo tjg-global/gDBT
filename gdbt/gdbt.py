@@ -3,9 +3,6 @@ import os, sys
 import re
 import subprocess
 
-def print(*args):
-    sys.stderr.write(" ".join(args) + "\n")
-
 def main(command, args):
     DIRNAMES_TO_IGNORE = {".venv", ".venv0", "dbt_modules"}
     for dirpath, dirnames, filenames in os.walk("."):
