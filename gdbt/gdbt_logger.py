@@ -103,7 +103,7 @@ def main(job_id=None):
                 q.execute(MERGE_SQL, [node_name, status, job_id, started_at, finished_at])
 
 
-def commandline():
+def command_line():
     main(*sys.argv[1:])
 
 if __name__ == '__main__':
