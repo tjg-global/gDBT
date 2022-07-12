@@ -4,7 +4,16 @@ import argparse
 import re
 import subprocess
 
-def main(command, args):
+import yaml
+
+def name_is_macro(name):
+    #
+    # By the time we get here our cwd should be the dbt root folder
+    #
+    macros_dirpath = "macros"
+    return os.path.exists(os.path.join(macros_dirpath, name + ".sql"))
+
+def find_dbt_root():
     DIRNAMES_TO_IGNORE = {".venv", ".venv0", "dbt_modules"}
     for dirpath, dirnames, filenames in os.walk("."):
         if DIRNAMES_TO_IGNORE & set(os.path.normpath(dirpath.lower()).split(os.path.sep)):
@@ -13,8 +22,11 @@ def main(command, args):
             dbt_path = dirpath
             print("Switching to", os.path.abspath(dbt_path))
             os.chdir(dirpath)
-            break
+            return
+    else:
+        raise RuntimeError("Unable to find a dbt project")
 
+def find_git_branch():
     output = subprocess.run(
         ["git", "status"],
         capture_output=True
@@ -28,10 +40,46 @@ def main(command, args):
         # issue number or any of master, staging or production, there won't be
         # a suffix and we want the prefix
         #
-        env_branch = (branch_prefix or prefix).replace("-", "_")
-        break
+        return (branch_prefix or prefix).replace("-", "_")
     else:
-        env_branch = ""
+        return ""
+
+def find_dbt_executable():
+    for dirpath, exe in [
+        ("scripts", "dbt.exe"),
+        ("bin", "dbt")
+    ]:
+        dbt_filepath = os.path.join(os.environ["VIRTUAL_ENV"], dirpath, exe)
+        if os.path.exists(dbt_filepath):
+            return dbt_filepath
+    else:
+        raise RuntimeError("Unable to find a dbt executable in the virtual environment")
+
+def find_parameters(args):
+    """Detect parameters of the form --abc=123
+
+    Return a dictionary of name:value pairs
+    """
+    for arg in args:
+        match = re.match(r"--(\w+)=(\w+)", arg)
+        if match:
+            yield match.groups()
+
+def run_macro(command, dbt_exe, environment, args):
+    run_commands = [dbt_exe, "run-operation", command]
+    vars = list(find_parameters(args))
+    if vars:
+        run_commands.append("--args")
+        yaml_args = ", ".join("%s: %s" % var for var in vars)
+        run_commands.append("{%s}" % yaml_args)
+    print("About to run macro as", run_commands)
+    subprocess.run(run_commands, env=environment)
+
+def main(command, args):
+    command = command.lower()
+    find_dbt_root()
+    dbt_exe = find_dbt_executable()
+    env_branch = find_git_branch()
 
     env_name = env_branch if env_branch in ('production', 'staging', 'master') else "aat"
     src_db_prefix = "aat_" if env_name in ("master", "aat") else "uat_" if env_name == "staging" else ""
@@ -57,26 +105,22 @@ def main(command, args):
     ]:
         print(v, "=>", environment.get(v))
 
-    for dirpath, exe in [
-        ("scripts", "dbt.exe"),
-        ("bin", "dbt")
-    ]:
+    #
+    # Check if we're being asked to run a macro
+    #
+    if name_is_macro(command):
+        print("About to run macro", command)
+        run_macro(command, dbt_exe, environment, args)
 
-        dbt_filepath = os.path.join(os.environ["VIRTUAL_ENV"], dirpath, exe)
-        if os.path.exists(dbt_filepath):
-            dbt_exe = dbt_filepath
-            break
     else:
-        raise RuntimeError("Unable to find a dbt executable in the virtual environment")
+        #
+        # If we're on a dev branch, but not master, set up the necessary databases
+        #
+        if env_name == "aat" and env_branch and command in ["run", "compile", "test", "docs", "seed"]:
+            print("About to set up dev branch")
+            subprocess.run([dbt_exe, "run-operation", "setup_dev_branch"], env=environment)
 
-    #
-    # If we're on a dev branch, but not master, set up the necessary databases
-    #
-    if env_name == "aat" and env_branch and command.lower() in ["run", "compile", "test", "docs", "seed"]:
-        print("About to set up dev branch")
-        subprocess.run([dbt_exe, "run-operation", "setup_dev_branch"], env=environment)
-
-    subprocess.run([dbt_exe] + list(args) + ['--target=%s' % target], env=environment)
+        subprocess.run([dbt_exe] + list(args) + ['--target=%s' % target], env=environment)
 
 def command_line():
     parser = argparse.ArgumentParser()
