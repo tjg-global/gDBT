@@ -20,14 +20,14 @@ def main(command, args):
     ).stdout.decode(sys.stdout.encoding)
     for branch in re.findall(r"On branch ([0-9a-zA-z/\-_]+)", output):
         prefix, _, suffix = branch.partition("/")
-        branch_prefix, _, _ = suffix.replace("-", "_").partition(" ")
+        branch_prefix, _, _ = suffix.partition(" ")
         #
         # If we have a branch named, eg, feature/rd-123 or issue/rd-456
         # then we want the rd-xxx element (the suffix). If we have an unadorned
         # issue number or any of master, staging or production, there won't be
         # a suffix and we want the prefix
         #
-        env_branch = branch_prefix or prefix
+        env_branch = (branch_prefix or prefix).replace("-", "_").
         break
     else:
         env_branch = ""
