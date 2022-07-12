@@ -4,7 +4,7 @@ import setuptools
 
 setuptools.setup(
     name='gdbt',
-    version='1.3.8',
+    version='1.3.9',
     description='Global DBT packages',
     author='Tim Golden',
     author_email='tim.golden@global.com',

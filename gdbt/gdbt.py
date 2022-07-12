@@ -1,5 +1,6 @@
 #!python3
 import os, sys
+import argparse
 import re
 import subprocess
 
@@ -71,14 +72,17 @@ def main(command, args):
     #
     # If we're on a dev branch, but not master, set up the necessary databases
     #
-    if env_name == "aat" and env_branch: ## and command.lower() in ["run", "compile", "test", "docs"]:
+    if env_name == "aat" and env_branch and command.lower() in ["run", "compile", "test", "docs", "seed"]:
         print("About to set up dev branch")
         subprocess.run([dbt_exe, "run-operation", "setup_dev_branch"], env=environment)
 
-    subprocess.run([dbt_exe] + [command] + list(args) + ['--target=%s' % target], env=environment)
+    subprocess.run([dbt_exe] + list(args) + ['--target=%s' % target], env=environment)
 
 def command_line():
-    main(sys.argv[1], sys.argv[2:])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command")
+    known_args, _ = parser.parse_known_args()
+    main(known_args.command, sys.argv[1:])
 
 if __name__ == '__main__':
     command_line()
