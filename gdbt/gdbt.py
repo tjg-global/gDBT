@@ -60,7 +60,8 @@ def main(command, args):
         ("scripts", "dbt.exe"),
         ("bin", "dbt")
     ]:
-        dbt_filepath = os.path.join(os.path.expandvars("%VIRTUAL_ENV%"), dirpath, exe)
+
+        dbt_filepath = os.path.join(os.environ["VIRTUAL_ENV"], dirpath, exe)
         if os.path.exists(dbt_filepath):
             dbt_exe = dbt_filepath
             break
