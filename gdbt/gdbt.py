@@ -27,7 +27,7 @@ def main(command, args):
         # issue number or any of master, staging or production, there won't be
         # a suffix and we want the prefix
         #
-        env_branch = (branch_prefix or prefix).replace("-", "_").
+        env_branch = (branch_prefix or prefix).replace("-", "_")
         break
     else:
         env_branch = ""
