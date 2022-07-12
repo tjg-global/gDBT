@@ -56,7 +56,17 @@ def main(command, args):
     ]:
         print(v, "=>", environment.get(v))
 
-    dbt_exe = os.path.expandvars("%VIRTUAL_ENV%\scripts\dbt.exe")
+    for dirpath, exe in [
+        ("scripts", "dbt.exe"),
+        ("bin", "dbt")
+    ]:
+        dbt_filepath = os.path.join(os.path.expandvars("%VIRTUAL_ENV%"), dirpath, exe)
+        if os.path.exists(dbt_filepath):
+            dbt_exe = dbt_filepath
+            break
+    else:
+        raise RuntimeError("Unable to find a dbt executable in the virtual environment")
+
     #
     # If we're on a dev branch, but not master, set up the necessary databases
     #
