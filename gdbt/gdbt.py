@@ -61,7 +61,7 @@ def find_parameters(args):
     Return a dictionary of name:value pairs
     """
     for arg in args:
-        match = re.match(r"--(\w+)=(\w+)", arg)
+        match = re.match(r"--([^=]+)=(\S+)", arg)
         if match:
             yield match.groups()
 
@@ -72,7 +72,6 @@ def run_macro(command, dbt_exe, environment, args):
         run_commands.append("--args")
         yaml_args = ", ".join("%s: %s" % var for var in vars)
         run_commands.append("{%s}" % yaml_args)
-    print("About to run macro as", run_commands)
     subprocess.run(run_commands, env=environment)
 
 def main(command, args):
