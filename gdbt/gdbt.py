@@ -55,6 +55,14 @@ def find_dbt_executable():
     else:
         raise RuntimeError("Unable to find a dbt executable in the virtual environment")
 
+def check_git_executable():
+    try:
+        subprocess.run(["git"])
+    except FileNotFoundError:
+        raise RuntimeError("Unable to find Git")
+    except OSError:
+        raise RuntimeError("Unable to run Git")
+
 def find_parameters(args):
     """Detect parameters of the form --abc=123
 
@@ -78,6 +86,7 @@ def main(command, args):
     command = command.lower()
     find_dbt_root()
     dbt_exe = find_dbt_executable()
+    check_git_executable()
     env_branch = find_git_branch()
 
     env_name = env_branch if env_branch in ('production', 'staging', 'master') else "aat"
