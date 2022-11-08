@@ -57,7 +57,7 @@ def find_dbt_executable():
 
 def check_git_executable():
     try:
-        subprocess.run(["git"])
+        subprocess.run(["git"], capture_output=True) # Don't bother checking the output
     except FileNotFoundError:
         raise RuntimeError("Unable to find Git")
     except OSError:
