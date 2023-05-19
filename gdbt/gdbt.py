@@ -4,8 +4,6 @@ import argparse
 import re
 import subprocess
 
-import yaml
-
 def name_is_macro(name):
     #
     # By the time we get here our cwd should be the dbt root folder
