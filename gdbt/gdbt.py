@@ -87,9 +87,9 @@ def main(command, args):
     check_git_executable()
     env_branch = find_git_branch()
 
-    env_name = env_branch if env_branch in ('production', 'staging', 'master') else "aat"
-    src_db_prefix = "aat_" if env_name in ("master", "aat") else "uat_" if env_name == "staging" else ""
-    target = "aat" if env_name in ('aat', 'master', 'dev') else env_branch
+    env_name = env_branch if env_branch in ('production', 'staging', 'master', 'main') else "aat"
+    src_db_prefix = "aat_" if env_name in ("main", "master", "aat") else "uat_" if env_name == "staging" else ""
+    target = "aat" if env_name in ('aat', 'master', 'main', 'dev') else env_branch
 
     environment = dict(os.environ)
     #
